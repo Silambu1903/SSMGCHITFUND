@@ -9,6 +9,7 @@ class TamilActionButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
   final List<Color>? gradientColors;
+  final bool expand;
 
   const TamilActionButton({
     super.key,
@@ -16,6 +17,7 @@ class TamilActionButton extends StatelessWidget {
     required this.icon,
     this.onPressed,
     this.gradientColors,
+    this.expand = false,
   });
 
   @override
@@ -46,10 +48,11 @@ class TamilActionButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           child: SizedBox(
             height: _kActionButtonHeight,
+            width: expand ? double.infinity : null,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(icon, size: 16, color: Colors.white),
@@ -78,17 +81,21 @@ class TamilOutlineButton extends StatelessWidget {
   final String label;
   final IconData? icon;
   final VoidCallback? onPressed;
+  final bool expand;
 
   const TamilOutlineButton({
     super.key,
     required this.label,
     this.icon,
     this.onPressed,
+    this.expand = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton.icon(
+    return SizedBox(
+      width: expand ? double.infinity : null,
+      child: OutlinedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon ?? Icons.arrow_forward, size: 14),
       label: Text(label, style: const TextStyle(fontSize: 12)),
@@ -100,6 +107,7 @@ class TamilOutlineButton extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
+    ),
     );
   }
 }

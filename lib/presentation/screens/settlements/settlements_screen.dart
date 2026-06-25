@@ -4,6 +4,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/responsive.dart';
+import '../../widgets/common/responsive_layout.dart';
 import '../../../data/repositories/settlement_repository.dart';
 import '../../widgets/common/loading_states.dart';
 import '../../widgets/common/section_card.dart';
@@ -23,25 +25,13 @@ class SettlementsScreen extends ConsumerWidget {
     final settlements = ref.watch(_settlementsProvider);
 
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: Responsive.pagePadding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(AppStrings.settlement,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w700)),
-                  Text(AppStrings.finalChitSettlementsSubtitle,
-                      style: const TextStyle(
-                          fontSize: 12, color: AppColors.textSecondary)),
-                ],
-              ),
-            ],
+          ScreenHeader(
+            title: AppStrings.settlement,
+            subtitle: AppStrings.finalChitSettlementsSubtitle,
           ),
           const SizedBox(height: 20),
           Expanded(

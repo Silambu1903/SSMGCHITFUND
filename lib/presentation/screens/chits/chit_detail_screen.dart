@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/responsive.dart';
 import '../../../data/models/auction_model.dart';
 import '../../../providers/chit_provider.dart';
 import '../../../providers/auction_provider.dart';
@@ -75,7 +76,7 @@ class _ChitDetailScreenState extends ConsumerState<ChitDetailScreen> {
             auctionScheduleLabel(c.auctionDay, c.auctionTime);
         final enrolledCount = members.valueOrNull?.length ?? 0;
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: Responsive.pagePadding(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -116,11 +117,15 @@ class _ChitDetailScreenState extends ConsumerState<ChitDetailScreen> {
                             const Icon(Icons.calendar_today_outlined,
                                 size: 12, color: AppColors.textSecondary),
                             const SizedBox(width: 4),
-                            Text(
-                              scheduleLabel,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
+                            Expanded(
+                              child: Text(
+                                scheduleLabel,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -136,79 +141,9 @@ class _ChitDetailScreenState extends ConsumerState<ChitDetailScreen> {
               ),
               const SizedBox(height: 20),
 
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: _StatBox(
-                        label: AppStrings.totalAmount,
-                        tamilLabel: AppStrings.chitValue,
-                        value: CurrencyFormatter.format(c.chitValue),
-                        icon: Icons.account_balance_wallet_outlined,
-                        iconBg: AppColors.statCard1,
-                        iconColor: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _StatBox(
-                        label: AppStrings.installment,
-                        tamilLabel: AppStrings.baseInstallment,
-                        value: CurrencyFormatter.format(c.monthlyInstallment),
-                        icon: Icons.calendar_month_outlined,
-                        iconBg: AppColors.statCard2,
-                        iconColor: AppColors.success,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _StatBox(
-                        label: AppStrings.bidSchedule,
-                        tamilLabel: AppStrings.biddingDate,
-                        value: _compactBidTime(c.auctionDay, c.auctionTime),
-                        subValue: AppStrings.everyMonth,
-                        icon: Icons.schedule_outlined,
-                        iconBg: AppColors.statCard1,
-                        iconColor: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _StatBox(
-                        label: AppStrings.commission,
-                        tamilLabel: AppStrings.commissionFee,
-                        value:
-                            '${c.foremanCommissionPercent.toInt()}% (${CurrencyFormatter.compact(c.commissionAmount)})',
-                        icon: Icons.percent,
-                        iconBg: AppColors.chipRed,
-                        iconColor: AppColors.error,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _StatBox(
-                        label: AppStrings.membersLabel,
-                        tamilLabel: AppStrings.members,
-                        value: '$enrolledCount / ${c.totalMembers}',
-                        icon: Icons.people_alt_outlined,
-                        iconBg: AppColors.statCard1,
-                        iconColor: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _StatBox(
-                        label: AppStrings.durationLabel,
-                        tamilLabel: AppStrings.duration,
-                        value: '${c.durationMonths} ${AppStrings.monthsShort}',
-                        icon: Icons.timer_outlined,
-                        iconBg: AppColors.surfaceVariant,
-                        iconColor: AppColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
+              _ChitStatsGrid(
+                enrolledCount: enrolledCount,
+                chit: c,
               ),
               const SizedBox(height: 20),
               Container(
@@ -218,57 +153,133 @@ class _ChitDetailScreenState extends ConsumerState<ChitDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceVariant,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.border),
-                            ),
-                            child: const Icon(Icons.gavel_outlined,
-                                size: 18, color: AppColors.primary),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
+                      padding: EdgeInsets.fromLTRB(
+                        Responsive.isMobile(context) ? 14 : 20,
+                        16,
+                        Responsive.isMobile(context) ? 14 : 20,
+                        14,
+                      ),
+                      child: Responsive.isMobile(context)
+                          ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  AppStrings.recentAuctions,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: 36,
+                                      height: 36,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.surfaceVariant,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                            color: AppColors.border),
+                                      ),
+                                      child: const Icon(Icons.gavel_outlined,
+                                          size: 18, color: AppColors.primary),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            AppStrings.recentAuctions,
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.textPrimary,
+                                            ),
+                                          ),
+                                          Text(
+                                            AppStrings.recentAuctionsSubtitle,
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TamilActionButton(
+                                        label: AppStrings.newAuction,
+                                        icon: Icons.gavel_rounded,
+                                        expand: true,
+                                        onPressed: () => context.go(
+                                            '/auctions/new?chit=$chitId'),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: TamilOutlineButton(
+                                        label: AppStrings.viewAll,
+                                        expand: true,
+                                        onPressed: () =>
+                                            context.go('/auctions'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
+                          : Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surfaceVariant,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: AppColors.border),
+                                  ),
+                                  child: const Icon(Icons.gavel_outlined,
+                                      size: 18, color: AppColors.primary),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        AppStrings.recentAuctions,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      Text(
+                                        AppStrings.recentAuctionsSubtitle,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                Text(
-                                  AppStrings.recentAuctionsSubtitle,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textSecondary,
-                                  ),
+                                TamilActionButton(
+                                  label: AppStrings.newAuction,
+                                  icon: Icons.gavel_rounded,
+                                  onPressed: () =>
+                                      context.go('/auctions/new?chit=$chitId'),
+                                ),
+                                const SizedBox(width: 8),
+                                TamilOutlineButton(
+                                  label: AppStrings.viewAll,
+                                  onPressed: () => context.go('/auctions'),
                                 ),
                               ],
                             ),
-                          ),
-                          TamilActionButton(
-                            label: AppStrings.newAuction,
-                            icon: Icons.gavel_rounded,
-                            onPressed: () =>
-                                context.go('/auctions/new?chit=$chitId'),
-                          ),
-                          const SizedBox(width: 8),
-                          TamilOutlineButton(
-                            label: AppStrings.viewAll,
-                            onPressed: () => context.go('/auctions'),
-                          ),
-                        ],
-                      ),
                     ),
                     const Divider(height: 1),
                     auctions.when(
@@ -283,7 +294,7 @@ class _ChitDetailScreenState extends ConsumerState<ChitDetailScreen> {
                       data: (list) {
                         if (list.isEmpty) {
                           return Padding(
-                            padding: const EdgeInsets.all(24),
+                            padding: Responsive.pagePadding(context),
                             child: Center(
                               child: Text(
                                 AppStrings.noAuctionsYet,
@@ -325,24 +336,123 @@ class _ChitDetailScreenState extends ConsumerState<ChitDetailScreen> {
       },
     );
   }
+}
 
-  static String _compactBidTime(int day, String? time) {
-    final suffix = day == 1
-        ? 'st'
-        : day == 2
-            ? 'nd'
-            : day == 3
-                ? 'rd'
-                : 'th';
-    if (time == null || time.isEmpty) return '${day}$suffix';
-    final parts = time.split(':');
-    if (parts.length < 2) return '${day}$suffix';
-    final hour = int.tryParse(parts[0]) ?? 0;
-    final minute = int.tryParse(parts[1]) ?? 0;
-    final ampm = hour < 12 ? 'AM' : 'PM';
-    final h12 = hour == 0 ? 12 : hour > 12 ? hour - 12 : hour;
-    final timeStr = '$h12:${minute.toString().padLeft(2, '0')} $ampm';
-    return '${day}$suffix @ $timeStr';
+String _compactBidTime(int day, String? time) {
+  final suffix = day == 1
+      ? 'st'
+      : day == 2
+          ? 'nd'
+          : day == 3
+              ? 'rd'
+              : 'th';
+  if (time == null || time.isEmpty) return '$day$suffix';
+  final parts = time.split(':');
+  if (parts.length < 2) return '$day$suffix';
+  final hour = int.tryParse(parts[0]) ?? 0;
+  final minute = int.tryParse(parts[1]) ?? 0;
+  final ampm = hour < 12 ? 'AM' : 'PM';
+  final h12 = hour == 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  final timeStr = '$h12:${minute.toString().padLeft(2, '0')} $ampm';
+  return '$day$suffix @ $timeStr';
+}
+
+class _ChitStatsGrid extends StatelessWidget {
+  final int enrolledCount;
+  final dynamic chit;
+  const _ChitStatsGrid({required this.enrolledCount, required this.chit});
+
+  @override
+  Widget build(BuildContext context) {
+    final boxes = [
+      _StatBox(
+        label: AppStrings.totalAmount,
+        tamilLabel: AppStrings.chitValue,
+        value: CurrencyFormatter.format(chit.chitValue),
+        icon: Icons.account_balance_wallet_outlined,
+        iconBg: AppColors.statCard1,
+        iconColor: AppColors.primary,
+      ),
+      _StatBox(
+        label: AppStrings.installment,
+        tamilLabel: AppStrings.baseInstallment,
+        value: CurrencyFormatter.format(chit.monthlyInstallment),
+        icon: Icons.calendar_month_outlined,
+        iconBg: AppColors.statCard2,
+        iconColor: AppColors.success,
+      ),
+      _StatBox(
+        label: AppStrings.bidSchedule,
+        tamilLabel: AppStrings.biddingDate,
+        value: _compactBidTime(
+            chit.auctionDay as int, chit.auctionTime as String?),
+        subValue: AppStrings.everyMonth,
+        icon: Icons.schedule_outlined,
+        iconBg: AppColors.statCard1,
+        iconColor: AppColors.primary,
+      ),
+      _StatBox(
+        label: AppStrings.commission,
+        tamilLabel: AppStrings.commissionFee,
+        value:
+            '${chit.foremanCommissionPercent.toInt()}% (${CurrencyFormatter.compact(chit.commissionAmount)})',
+        icon: Icons.percent,
+        iconBg: AppColors.chipRed,
+        iconColor: AppColors.error,
+      ),
+      _StatBox(
+        label: AppStrings.membersLabel,
+        tamilLabel: AppStrings.members,
+        value: '$enrolledCount / ${chit.totalMembers}',
+        icon: Icons.people_alt_outlined,
+        iconBg: AppColors.statCard1,
+        iconColor: AppColors.primary,
+      ),
+      _StatBox(
+        label: AppStrings.durationLabel,
+        tamilLabel: AppStrings.duration,
+        value: '${chit.durationMonths} ${AppStrings.monthsShort}',
+        icon: Icons.timer_outlined,
+        iconBg: AppColors.surfaceVariant,
+        iconColor: AppColors.textMuted,
+      ),
+    ];
+
+    if (Responsive.isMobile(context)) {
+      return GridView.count(
+        crossAxisCount: 2,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 1.35,
+        children: boxes,
+      );
+    }
+
+    if (!Responsive.isWide(context)) {
+      return GridView.count(
+        crossAxisCount: 3,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 1.5,
+        children: boxes,
+      );
+    }
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < boxes.length; i++) ...[
+            if (i > 0) const SizedBox(width: 10),
+            Expanded(child: boxes[i]),
+          ],
+        ],
+      ),
+    );
   }
 }
 
@@ -360,7 +470,7 @@ class _ActiveBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        status.toUpperCase(),
+        AppStrings.chitStatusLabel(status),
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
@@ -393,83 +503,66 @@ class _StatBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = Responsive.isMobile(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(compact ? 10 : 14),
       decoration: AppColors.cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 28,
-                height: 28,
+                width: compact ? 24 : 28,
+                height: compact ? 24 : 28,
                 decoration: BoxDecoration(
                   color: iconBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 14, color: iconColor),
+                child: Icon(icon, size: compact ? 12 : 14, color: iconColor),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   AppStrings.isTamil ? tamilLabel : label,
-                  style: const TextStyle(
-                    fontSize: 10,
+                  style: TextStyle(
+                    fontSize: compact ? 9 : 10,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textSecondary,
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 38,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                value,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                  height: 1.2,
-                ),
+          SizedBox(height: compact ? 6 : 10),
+          Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: compact ? 13 : 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              height: 1.2,
+            ),
+          ),
+          if (subValue != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              subValue!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 10,
+                color: AppColors.textMuted,
               ),
             ),
-          ),
-          SizedBox(
-            height: 14,
-            child: subValue != null
-                ? Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      subValue!,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-          const Spacer(),
-          Text(
-            AppStrings.isTamil ? label : tamilLabel,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 9,
-              color: AppColors.textMuted,
-            ),
-          ),
+          ],
         ],
       ),
     );

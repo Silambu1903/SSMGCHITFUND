@@ -5,6 +5,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/responsive.dart';
+import '../../widgets/common/responsive_layout.dart';
 import '../../../data/models/auction_model.dart';
 import '../../../providers/auction_provider.dart';
 import '../../../providers/language_provider.dart';
@@ -27,34 +29,22 @@ class _AuctionsScreenState extends ConsumerState<AuctionsScreen> {
     final auctions = ref.watch(auctionsProvider(null));
 
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: Responsive.pagePadding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(AppStrings.auctions,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w700)),
-                  Text(AppStrings.auctionCalculation,
-                      style: const TextStyle(
-                          fontSize: 12, color: AppColors.textSecondary)),
-                ],
+          ScreenHeader(
+            title: AppStrings.auctions,
+            subtitle: AppStrings.auctionCalculation,
+            action: ElevatedButton.icon(
+              onPressed: () => context.go('/auctions/new'),
+              icon: const Icon(Icons.gavel, size: 16),
+              label: Text(AppStrings.newEntry),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
               ),
-              ElevatedButton.icon(
-                onPressed: () => context.go('/auctions/new'),
-                icon: const Icon(Icons.gavel, size: 16),
-                label: Text(AppStrings.newEntry),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: 14),
           AuctionDayFilter(
@@ -224,37 +214,43 @@ class _AuctionCard extends ConsumerWidget {
             const SizedBox(height: 12),
 
             // Calculation grid
-            Row(
-              children: [
-                _CalcTile(
+            ResponsiveLabelGrid(
+              mobileColumns: 2,
+              wideColumns: 3,
+              items: [
+                (
                   label: AppStrings.chitTotal,
                   value: CurrencyFormatter.compact(auction.chitAmount),
+                  color: null,
                 ),
-                _CalcTile(
+                (
                   label: AppStrings.discountAmount,
                   value: CurrencyFormatter.compact(
                       auction.winningDiscountAmount ?? 0),
+                  color: null,
                 ),
-                _CalcTile(
+                (
                   label: AppStrings.prizeAmount,
                   value: CurrencyFormatter.compact(auction.prizeAmount ?? 0),
                   color: AppColors.success,
                 ),
-                _CalcTile(
+                (
                   label: AppStrings.commissionAmount,
                   value: CurrencyFormatter.compact(
                       auction.commissionAmount ?? 0),
+                  color: null,
                 ),
-                _CalcTile(
+                (
                   label: AppStrings.dividendPerMember,
                   value: CurrencyFormatter.compact(
                       auction.dividendPerMember ?? 0),
                   color: AppColors.primary,
                 ),
-                _CalcTile(
+                (
                   label: AppStrings.nextMonthPayable,
                   value: CurrencyFormatter.compact(
                       auction.nextMonthPayable ?? 0),
+                  color: null,
                 ),
               ],
             ),
@@ -336,40 +332,3 @@ class _AuctionCard extends ConsumerWidget {
   }
 }
 
-class _CalcTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-  const _CalcTile({
-    required this.label,
-    required this.value,
-    this.color = AppColors.textPrimary,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 9,
-              color: AppColors.textMuted,
-            ),
-            maxLines: 2,
-          ),
-        ],
-      ),
-    );
-  }
-}

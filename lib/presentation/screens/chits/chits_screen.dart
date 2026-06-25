@@ -5,6 +5,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/responsive.dart';
+import '../../widgets/common/responsive_layout.dart';
 import '../../../providers/chit_provider.dart';
 import '../../../providers/language_provider.dart';
 import '../../widgets/common/loading_states.dart';
@@ -25,31 +27,18 @@ class _ChitsScreenState extends ConsumerState<ChitsScreen> {
     final chits = ref.watch(chitsProvider(null));
 
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: Responsive.pagePadding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(AppStrings.chitFunds,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w700)),
-                  Text(AppStrings.manageChitsSubtitle,
-                      style: const TextStyle(
-                          fontSize: 12, color: AppColors.textSecondary)),
-                ],
-              ),
-              ElevatedButton.icon(
-                onPressed: () => context.go('/chits/create'),
-                icon: const Icon(Icons.add, size: 16),
-                label: Text(AppStrings.createNewChit),
-              ),
-            ],
+          ScreenHeader(
+            title: AppStrings.chitFunds,
+            subtitle: AppStrings.manageChitsSubtitle,
+            action: ElevatedButton.icon(
+              onPressed: () => context.go('/chits/create'),
+              icon: const Icon(Icons.add, size: 16),
+              label: Text(AppStrings.createNewChit),
+            ),
           ),
           const SizedBox(height: 14),
           // Filter chips
@@ -259,24 +248,26 @@ class _ChitCard extends StatelessWidget {
             const SizedBox(height: 14),
 
             // Stats
-            Row(
-              children: [
-                _ChitStat(
+            ResponsiveLabelGrid(
+              mobileColumns: 2,
+              wideColumns: 4,
+              items: [
+                (
                   label: AppStrings.chitValue,
                   value: CurrencyFormatter.compact(chit.chitValue),
                   color: AppColors.primary,
                 ),
-                _ChitStat(
+                (
                   label: AppStrings.membersCountLabel,
                   value: '${chit.totalMembers}',
                   color: AppColors.textPrimary,
                 ),
-                _ChitStat(
+                (
                   label: AppStrings.baseInstallment,
                   value: CurrencyFormatter.compact(chit.monthlyInstallment),
                   color: AppColors.success,
                 ),
-                _ChitStat(
+                (
                   label: AppStrings.durationLabel,
                   value: AppStrings.durationValue(chit.durationMonths as int),
                   color: AppColors.textPrimary,
@@ -358,36 +349,3 @@ class _InfoPill extends StatelessWidget {
   }
 }
 
-class _ChitStat extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-  const _ChitStat(
-      {required this.label, required this.value, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 10,
-              color: AppColors.textMuted,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

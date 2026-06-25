@@ -74,29 +74,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ],
             );
           }
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          final topInset = MediaQuery.paddingOf(context).top;
+          final bottomInset = MediaQuery.paddingOf(context).bottom;
+          final availableHeight =
+              constraints.maxHeight - topInset - bottomInset;
+          final heroHeight =
+              (availableHeight * 0.30).clamp(160.0, 220.0);
+          return SafeArea(
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.only(bottom: 16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   SizedBox(
-                    height: 280,
+                    height: heroHeight,
                     child: _HeroPanel(isCompact: true),
                   ),
-                  _LoginPanel(
-                    formKey: _formKey,
-                    identifierCtrl: _identifierCtrl,
-                    passCtrl: _passCtrl,
-                    obscure: _obscure,
-                    rememberMe: _rememberMe,
-                    isLoading: isLoading,
-                    loginState: loginState,
-                    onToggleObscure: () =>
-                        setState(() => _obscure = !_obscure),
-                    onRememberChanged: (v) =>
-                        setState(() => _rememberMe = v ?? false),
-                    onSubmit: _submit,
-                    embedded: true,
+                  Transform.translate(
+                    offset: const Offset(0, -16),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _LoginPanel(
+                        formKey: _formKey,
+                        identifierCtrl: _identifierCtrl,
+                        passCtrl: _passCtrl,
+                        obscure: _obscure,
+                        rememberMe: _rememberMe,
+                        isLoading: isLoading,
+                        loginState: loginState,
+                        onToggleObscure: () =>
+                            setState(() => _obscure = !_obscure),
+                        onRememberChanged: (v) =>
+                            setState(() => _rememberMe = v ?? false),
+                        onSubmit: _submit,
+                        embedded: true,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -261,52 +275,45 @@ class _LoginPanel extends StatelessWidget {
   static const _navy = Color(0xFF002147);
   static const _loginBg = Color(0xFFF4F6F9);
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: _loginBg,
-      child: Stack(
-        children: [
-          Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: embedded ? 24 : 40,
-                vertical: embedded ? 24 : 32,
+  Widget _buildFormCard(BuildContext context) {
+    final compact = embedded;
+    return Material(
+      elevation: compact ? 2 : 8,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(compact ? 14 : 16),
+      color: Colors.white,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          compact ? 20 : 32,
+          compact ? 24 : 36,
+          compact ? 20 : 32,
+          compact ? 20 : 32,
+        ),
+        child: Form(
+          key: formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                AppStrings.loginWelcomeTitle,
+                style: TextStyle(
+                  fontSize: compact ? 22 : 26,
+                  fontWeight: FontWeight.w800,
+                  color: _navy,
+                  height: 1.2,
+                ),
               ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Material(
-                  elevation: embedded ? 2 : 8,
-                  shadowColor: Colors.black.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(16),
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 36, 32, 32),
-                    child: Form(
-                      key: formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            AppStrings.loginWelcomeTitle,
-                            style: const TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              color: _navy,
-                              height: 1.2,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            AppStrings.loginWelcomeSubtitle,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                              height: 1.45,
-                            ),
-                          ),
-                          const SizedBox(height: 28),
+              const SizedBox(height: 6),
+              Text(
+                AppStrings.loginWelcomeSubtitle,
+                style: TextStyle(
+                  fontSize: compact ? 12 : 13,
+                  color: AppColors.textSecondary,
+                  height: 1.45,
+                ),
+              ),
+              SizedBox(height: compact ? 20 : 28),
                           if (loginState.hasError) ...[
                             Container(
                               width: double.infinity,
@@ -441,56 +448,101 @@ class _LoginPanel extends StatelessWidget {
                                   horizontal: 14, vertical: 14),
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              SizedBox(
-                                height: 36,
-                                child: Checkbox(
-                                  value: rememberMe,
-                                  onChanged: onRememberChanged,
-                                  activeColor: _navy,
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                              ),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () =>
-                                      onRememberChanged(!rememberMe),
-                                  child: Text(
-                                    AppStrings.rememberMe,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {},
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: Size.zero,
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                child: Text(
-                                  AppStrings.forgotPassword,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: _navy,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
+              SizedBox(height: compact ? 10 : 12),
+              if (compact) ...[
+                Row(
+                  children: [
+                    SizedBox(
+                      height: 36,
+                      child: Checkbox(
+                        value: rememberMe,
+                        onChanged: onRememberChanged,
+                        activeColor: _navy,
+                        materialTapTargetSize:
+                            MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => onRememberChanged(!rememberMe),
+                        child: Text(
+                          AppStrings.rememberMe,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
                           ),
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: ElevatedButton(
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      AppStrings.forgotPassword,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _navy,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ] else
+                Row(
+                  children: [
+                    SizedBox(
+                      height: 36,
+                      child: Checkbox(
+                        value: rememberMe,
+                        onChanged: onRememberChanged,
+                        activeColor: _navy,
+                        materialTapTargetSize:
+                            MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => onRememberChanged(!rememberMe),
+                        child: Text(
+                          AppStrings.rememberMe,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        AppStrings.forgotPassword,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: _navy,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              SizedBox(height: compact ? 16 : 20),
+              SizedBox(
+                width: double.infinity,
+                height: compact ? 46 : 50,
+                child: ElevatedButton(
                               onPressed: isLoading ? null : onSubmit,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: _navy,
@@ -525,13 +577,91 @@ class _LoginPanel extends StatelessWidget {
                                             size: 18),
                                       ],
                                     ),
-                            ),
-                          ),
-                        ],
-                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Padding(
+      padding: EdgeInsets.only(top: embedded ? 12 : 0),
+      child: Column(
+        children: [
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: embedded ? 12 : 20,
+            runSpacing: 4,
+            children: [
+              _FooterLink(label: AppStrings.privacyPolicy),
+              _FooterLink(label: AppStrings.terms),
+              _FooterLink(label: AppStrings.security),
+              _FooterLink(label: AppStrings.help),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            AppStrings.loginCopyright,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.textMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (embedded) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              _buildFormCard(context),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  onPressed: () {},
+                  icon: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.border),
+                      color: Colors.white,
                     ),
+                    child: const Icon(Icons.help_outline,
+                        size: 15, color: AppColors.textMuted),
                   ),
                 ),
+              ),
+            ],
+          ),
+          _buildFooter(),
+        ],
+      );
+    }
+
+    return Container(
+      color: _loginBg,
+      child: Stack(
+        children: [
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: _buildFormCard(context),
               ),
             ),
           ),
@@ -557,29 +687,7 @@ class _LoginPanel extends StatelessWidget {
             left: 0,
             right: 0,
             bottom: 16,
-            child: Column(
-              children: [
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 20,
-                  runSpacing: 4,
-                  children: [
-                    _FooterLink(label: AppStrings.privacyPolicy),
-                    _FooterLink(label: AppStrings.terms),
-                    _FooterLink(label: AppStrings.security),
-                    _FooterLink(label: AppStrings.help),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  AppStrings.loginCopyright,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
-            ),
+            child: _buildFooter(),
           ),
         ],
       ),

@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/responsive.dart';
 import '../../../providers/member_provider.dart';
 import '../../../providers/payment_provider.dart';
 import '../../../providers/language_provider.dart';
@@ -44,7 +45,7 @@ class MemberDetailScreen extends ConsumerWidget {
     final member = ref.watch(memberDetailProvider(memberId));
     final guarantors = ref.watch(guarantorsProvider(memberId));
     final outstanding = ref.watch(memberOutstandingProvider(memberId));
-    final isWide = MediaQuery.of(context).size.width > 900;
+    final isWide = Responsive.isWide(context);
 
     return member.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -52,7 +53,7 @@ class MemberDetailScreen extends ConsumerWidget {
       data: (m) {
         if (m == null) return ErrorWidget2(message: AppStrings.memberNotFound);
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: Responsive.pagePadding(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -133,7 +134,7 @@ class _ProfileCard extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: Responsive.pagePadding(context),
             decoration: const BoxDecoration(
               color: AppColors.sidebarBg,
               borderRadius: BorderRadius.only(
@@ -302,7 +303,7 @@ class _OutstandingCard extends StatelessWidget {
             data: (list) {
               if (list.isEmpty) {
                 return Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: Responsive.pagePadding(context),
                   child: Center(
                     child: Text(
                       AppStrings.noOutstandingBalance,
@@ -441,7 +442,7 @@ class _GuarantorsCard extends StatelessWidget {
             data: (list) {
               if (list.isEmpty) {
                 return Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: Responsive.pagePadding(context),
                   child: Center(
                     child: Text(
                       AppStrings.noGuarantorsAdded,

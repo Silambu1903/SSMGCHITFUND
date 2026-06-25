@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/responsive.dart';
 import '../../../data/models/auction_model.dart';
 import '../../../providers/dashboard_provider.dart';
 import '../../../providers/language_provider.dart';
@@ -22,35 +23,36 @@ class DashboardScreen extends ConsumerWidget {
     final group10        = ref.watch(monthlyGroupProvider(10));
     final group20        = ref.watch(monthlyGroupProvider(20));
     final winners        = ref.watch(thisMonthWinnersProvider);
-    final isWide         = MediaQuery.of(context).size.width > 1024;
+    final isWide         = Responsive.isWide(context);
+    final isMobile       = Responsive.isMobile(context);
 
     final now        = DateTime.now();
     final monthLabel = AppStrings.monthYear(now);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: Responsive.pagePadding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Summary stats grid ─────────────────────────────────────────────
           metrics.when(
             loading: () => GridView.count(
-              crossAxisCount: isWide ? 4 : 2,
+              crossAxisCount: Responsive.gridColumns(context, mobile: 2, wide: 4),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.4,
+              crossAxisSpacing: isMobile ? 10 : 16,
+              mainAxisSpacing: isMobile ? 10 : 16,
+              childAspectRatio: isMobile ? 1.25 : 1.4,
               children: List.generate(7, (_) => const CardShimmer()),
             ),
             error: (e, _) => ErrorWidget2(message: e.toString()),
             data: (m) => GridView.count(
-              crossAxisCount: isWide ? 4 : 2,
+              crossAxisCount: Responsive.gridColumns(context, mobile: 2, wide: 4),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.4,
+              crossAxisSpacing: isMobile ? 10 : 16,
+              mainAxisSpacing: isMobile ? 10 : 16,
+              childAspectRatio: isMobile ? 1.25 : 1.4,
               children: [
                 StatCard(
                   title: AppStrings.totalMembers,
@@ -455,6 +457,7 @@ class _MonthlyWinnersSection extends StatelessWidget {
       data: (list) {
         if (list.isEmpty) return const SizedBox.shrink();
 
+        final isMobile = Responsive.isMobile(context);
         final totalPending = list
             .where((a) => !a.prizePaid)
             .fold<double>(0, (s, a) => s + (a.prizeAmount ?? 0));
@@ -465,8 +468,8 @@ class _MonthlyWinnersSection extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Section header
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Icons.emoji_events_rounded,
                     size: 16, color: AppColors.warning),
@@ -474,48 +477,56 @@ class _MonthlyWinnersSection extends StatelessWidget {
                 Expanded(
                   child: Text(
                     AppStrings.prizeSettlement(monthLabel),
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                        fontSize: isMobile ? 14 : 15,
+                        fontWeight: FontWeight.w700),
                   ),
                 ),
-                if (totalPending > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.chipAmber,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      AppStrings.amountPending(
-                          CurrencyFormatter.compact(totalPending)),
-                      style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.warning),
-                    ),
-                  ),
-                if (totalPaid > 0) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.chipGreen,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      AppStrings.amountPaidBadge(
-                          CurrencyFormatter.compact(totalPaid)),
-                      style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.success),
-                    ),
-                  ),
-                ],
               ],
             ),
+            if (totalPending > 0 || totalPaid > 0) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  if (totalPending > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.chipAmber,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        AppStrings.amountPending(
+                            CurrencyFormatter.compact(totalPending)),
+                        style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.warning),
+                      ),
+                    ),
+                  if (totalPaid > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.chipGreen,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        AppStrings.amountPaidBadge(
+                            CurrencyFormatter.compact(totalPaid)),
+                        style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.success),
+                      ),
+                    ),
+                ],
+              ),
+            ],
             const SizedBox(height: 4),
             Text(
               AppStrings.auctionWinnersCount(list.length),
@@ -524,8 +535,13 @@ class _MonthlyWinnersSection extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Winners table card
-            Container(
+            if (isMobile)
+              ...list.map((a) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _WinnerMobileCard(auction: a),
+                  ))
+            else
+              Container(
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(14),
@@ -592,6 +608,111 @@ class _MonthlyWinnersSection extends StatelessWidget {
     color: AppColors.textMuted,
     letterSpacing: 0.5,
   );
+}
+
+class _WinnerMobileCard extends StatelessWidget {
+  final AuctionModel auction;
+  const _WinnerMobileCard({required this.auction});
+
+  @override
+  Widget build(BuildContext context) {
+    final a = auction;
+    final name = a.winnerName ?? AppStrings.unknown;
+    final initials =
+        name.trim().split(' ').map((w) => w.isEmpty ? '' : w[0]).take(2).join();
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: a.prizePaid
+            ? AppColors.chipGreen.withValues(alpha: 0.35)
+            : AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor:
+                a.prizePaid ? AppColors.chipGreen : AppColors.chipBlue,
+            child: Text(
+              initials.toUpperCase(),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: a.prizePaid ? AppColors.success : AppColors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name,
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w600)),
+                if (a.winnerMemberNo != null)
+                  Text(a.winnerMemberNo!,
+                      style: const TextStyle(
+                          fontSize: 11, color: AppColors.textMuted)),
+                const SizedBox(height: 4),
+                Text(
+                  a.chitName ?? '-',
+                  style: const TextStyle(fontSize: 12),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: (a.auctionDay == 10)
+                            ? AppColors.chipBlue
+                            : AppColors.chipPurple,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        AppStrings.nthDay(a.auctionDay),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: (a.auctionDay == 10)
+                              ? AppColors.primary
+                              : const Color(0xFF7C3AED),
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      CurrencyFormatter.format(a.prizeAmount ?? 0),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: a.prizePaid
+                            ? AppColors.success
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                    if (a.prizePaid) ...[
+                      const SizedBox(width: 4),
+                      const Icon(Icons.check_circle_rounded,
+                          size: 18, color: AppColors.success),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _WinnerRow extends StatelessWidget {

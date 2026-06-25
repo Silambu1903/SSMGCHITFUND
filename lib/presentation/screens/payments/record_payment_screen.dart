@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/responsive.dart';
 import '../../../providers/payment_provider.dart';
 import '../../../providers/language_provider.dart';
 
@@ -86,7 +87,7 @@ class _RecordPaymentScreenState
     final state = ref.watch(paymentFormProvider);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: Responsive.pagePadding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -105,7 +106,7 @@ class _RecordPaymentScreenState
           Form(
             key: _formKey,
             child: Container(
-              padding: const EdgeInsets.all(24),
+              padding: Responsive.pagePadding(context),
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),

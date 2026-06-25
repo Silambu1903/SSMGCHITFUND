@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/utils/responsive.dart';
 import '../../../providers/language_provider.dart';
 
 class ReportsScreen extends ConsumerWidget {
@@ -56,7 +57,7 @@ class ReportsScreen extends ConsumerWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: Responsive.pagePadding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -70,9 +71,9 @@ class ReportsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           Expanded(
             child: GridView.builder(
-              gridDelegate:
-                  const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 320,
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent:
+                    Responsive.isMobile(context) ? 280 : 320,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
                 childAspectRatio: 1.6,

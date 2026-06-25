@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/responsive.dart';
 import '../../../data/models/auction_model.dart';
 import '../../../data/models/chit_model.dart';
 import '../../../data/models/member_model.dart';
@@ -359,10 +360,10 @@ class _RecordAuctionScreenState extends ConsumerState<RecordAuctionScreen> {
   Widget build(BuildContext context) {
     ref.watch(languageProvider);
     final chitsAsync = ref.watch(chitsProvider(null));
-    final isWide = MediaQuery.of(context).size.width >= 800;
+    final isWide = Responsive.isWide(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: Responsive.pagePadding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

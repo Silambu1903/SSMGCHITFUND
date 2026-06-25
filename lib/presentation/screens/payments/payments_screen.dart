@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/responsive.dart';
 import '../../../providers/payment_provider.dart';
 import '../../../providers/language_provider.dart';
 import '../../widgets/common/loading_states.dart';
@@ -20,49 +21,57 @@ class PaymentsScreen extends ConsumerWidget {
     final payments = ref.watch(paymentsProvider);
     final statuses = [null, 'Paid', 'Partial', 'Pending', 'Overdue'];
 
+    final mobile = Responsive.isMobile(context);
+    final filterChips = SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: statuses.map((s) {
+          final isSelected = s == statusFilter;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: Text(s == null
+                  ? AppStrings.filterAll
+                  : AppStrings.paymentStatus(s)),
+              selected: isSelected,
+              onSelected: (_) =>
+                  ref.read(paymentStatusFilterProvider.notifier).state = s,
+              backgroundColor: AppColors.surface,
+              selectedColor: AppColors.chipBlue,
+              checkmarkColor: AppColors.primary,
+              labelStyle: TextStyle(
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+    final recordButton = ElevatedButton.icon(
+      onPressed: () => context.go('/payments/record'),
+      icon: const Icon(Icons.add, size: 16),
+      label: Text(AppStrings.recordPayment),
+    );
+
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: Responsive.pagePadding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: statuses.map((s) {
-                      final isSelected = s == statusFilter;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(s == null ? AppStrings.filterAll : AppStrings.paymentStatus(s)),
-                          selected: isSelected,
-                          onSelected: (_) => ref
-                              .read(paymentStatusFilterProvider.notifier)
-                              .state = s,
-                          backgroundColor: AppColors.surface,
-                          selectedColor: AppColors.chipBlue,
-                          checkmarkColor: AppColors.primary,
-                          labelStyle: TextStyle(
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.textSecondary,
-                            fontSize: 12,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => context.go('/payments/record'),
-                icon: const Icon(Icons.add, size: 16),
-                label: Text(AppStrings.recordPayment),
-              ),
-            ],
-          ),
+          if (mobile) ...[
+            filterChips,
+            const SizedBox(height: 12),
+            SizedBox(width: double.infinity, child: recordButton),
+          ] else
+            Row(
+              children: [
+                Expanded(child: filterChips),
+                recordButton,
+              ],
+            ),
           const SizedBox(height: 16),
           Expanded(
             child: payments.when(

@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/responsive.dart';
 import '../../../data/models/auction_model.dart';
 import '../../../core/services/auction_pdf_export_helper.dart';
 import '../../../providers/auction_provider.dart';
@@ -12,6 +13,7 @@ import '../../../providers/dashboard_provider.dart';
 import '../../../providers/language_provider.dart';
 import '../../widgets/common/loading_states.dart';
 import '../../widgets/common/confirm_delete_dialog.dart';
+import '../../widgets/common/responsive_layout.dart';
 
 class AuctionDetailScreen extends ConsumerStatefulWidget {
   final String auctionId;
@@ -170,7 +172,7 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
           return ErrorWidget2(message: AppStrings.auctionNotFound);
         }
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: Responsive.pagePadding(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -245,48 +247,102 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                         style: const TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 16),
-                    _CalcRow(
-                      label: AppStrings.chitTotal,
-                      value: CurrencyFormatter.format(a.chitAmount),
-                    ),
-                    _CalcRow(
-                      label: AppStrings.discountAmount,
-                      value: CurrencyFormatter.format(
-                          a.winningDiscountAmount ?? 0),
-                      valueColor: AppColors.error,
-                    ),
-                    const Divider(),
-                    _CalcRow(
-                      label: AppStrings.prizeAmount,
-                      value: CurrencyFormatter.format(a.prizeAmount ?? 0),
-                      valueColor: AppColors.success,
-                      bold: true,
-                    ),
-                    _CalcRow(
-                      label: AppStrings.commissionAmount,
-                      value: CurrencyFormatter.format(
-                          a.commissionAmount ?? 0),
-                      valueColor: AppColors.warning,
-                    ),
-                    _CalcRow(
-                      label: AppStrings.dividendPool,
-                      value: CurrencyFormatter.format(a.dividendPool ?? 0),
-                    ),
-                    _CalcRow(
-                      label: AppStrings.dividendPerMember,
-                      value: CurrencyFormatter.format(
-                          a.dividendPerMember ?? 0),
-                      valueColor: AppColors.primary,
-                      bold: true,
-                    ),
-                    const Divider(),
-                    _CalcRow(
-                      label: AppStrings.nextMonthPayable,
-                      value: CurrencyFormatter.format(
-                          a.nextMonthPayable ?? 0),
-                      valueColor: AppColors.primary,
-                      bold: true,
-                    ),
+                    Responsive.isWide(context)
+                        ? Column(
+                            children: [
+                              _CalcRow(
+                                label: AppStrings.chitTotal,
+                                value: CurrencyFormatter.format(a.chitAmount),
+                              ),
+                              _CalcRow(
+                                label: AppStrings.discountAmount,
+                                value: CurrencyFormatter.format(
+                                    a.winningDiscountAmount ?? 0),
+                                valueColor: AppColors.error,
+                              ),
+                              const Divider(),
+                              _CalcRow(
+                                label: AppStrings.prizeAmount,
+                                value: CurrencyFormatter.format(
+                                    a.prizeAmount ?? 0),
+                                valueColor: AppColors.success,
+                                bold: true,
+                              ),
+                              _CalcRow(
+                                label: AppStrings.commissionAmount,
+                                value: CurrencyFormatter.format(
+                                    a.commissionAmount ?? 0),
+                                valueColor: AppColors.warning,
+                              ),
+                              _CalcRow(
+                                label: AppStrings.dividendPool,
+                                value: CurrencyFormatter.format(
+                                    a.dividendPool ?? 0),
+                              ),
+                              _CalcRow(
+                                label: AppStrings.dividendPerMember,
+                                value: CurrencyFormatter.format(
+                                    a.dividendPerMember ?? 0),
+                                valueColor: AppColors.primary,
+                                bold: true,
+                              ),
+                              const Divider(),
+                              _CalcRow(
+                                label: AppStrings.nextMonthPayable,
+                                value: CurrencyFormatter.format(
+                                    a.nextMonthPayable ?? 0),
+                                valueColor: AppColors.primary,
+                                bold: true,
+                              ),
+                            ],
+                          )
+                        : ResponsiveLabelGrid(
+                            mobileColumns: 2,
+                            wideColumns: 3,
+                            items: [
+                              (
+                                label: AppStrings.chitTotal,
+                                value: CurrencyFormatter.format(a.chitAmount),
+                                color: null,
+                              ),
+                              (
+                                label: AppStrings.discountAmount,
+                                value: CurrencyFormatter.format(
+                                    a.winningDiscountAmount ?? 0),
+                                color: AppColors.error,
+                              ),
+                              (
+                                label: AppStrings.prizeAmount,
+                                value: CurrencyFormatter.format(
+                                    a.prizeAmount ?? 0),
+                                color: AppColors.success,
+                              ),
+                              (
+                                label: AppStrings.commissionAmount,
+                                value: CurrencyFormatter.format(
+                                    a.commissionAmount ?? 0),
+                                color: AppColors.warning,
+                              ),
+                              (
+                                label: AppStrings.dividendPool,
+                                value: CurrencyFormatter.format(
+                                    a.dividendPool ?? 0),
+                                color: null,
+                              ),
+                              (
+                                label: AppStrings.dividendPerMember,
+                                value: CurrencyFormatter.format(
+                                    a.dividendPerMember ?? 0),
+                                color: AppColors.primary,
+                              ),
+                              (
+                                label: AppStrings.nextMonthPayable,
+                                value: CurrencyFormatter.format(
+                                    a.nextMonthPayable ?? 0),
+                                color: AppColors.primary,
+                              ),
+                            ],
+                          ),
                     if (a.winnerName != null) ...[
                       const Divider(),
                       _CalcRow(
@@ -329,7 +385,7 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                       data: (list) {
                         if (list.isEmpty) {
                           return Padding(
-                            padding: const EdgeInsets.all(24),
+                            padding: Responsive.pagePadding(context),
                             child: Center(
                               child: Text(AppStrings.noBidsRecorded,
                                   style: const TextStyle(

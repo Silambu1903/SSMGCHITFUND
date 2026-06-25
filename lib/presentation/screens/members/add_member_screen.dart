@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/responsive.dart';
 import '../../../core/utils/supabase_payload.dart';
 import '../../../data/models/member_model.dart';
 import '../../../providers/member_provider.dart';
@@ -213,11 +214,11 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
   Widget build(BuildContext context) {
     ref.watch(languageProvider);
     final formState = ref.watch(memberFormProvider);
-    final isWide = MediaQuery.of(context).size.width > 900;
+    final isWide = Responsive.isWide(context);
     final isBusy = formState.isLoading || _prefilling;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: Responsive.pagePadding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

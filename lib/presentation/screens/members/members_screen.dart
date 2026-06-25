@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/responsive.dart';
 import '../../../providers/member_provider.dart';
 import '../../../providers/language_provider.dart';
 import '../../widgets/common/loading_states.dart';
@@ -60,50 +61,63 @@ class _MembersScreenState extends ConsumerState<MembersScreen> {
     final members = ref.watch(membersProvider(null));
     ref.watch(memberSearchQueryProvider);
 
+    final mobile = Responsive.isMobile(context);
+    final searchField = TextField(
+      decoration: InputDecoration(
+        hintText: AppStrings.search,
+        prefixIcon: const Icon(Icons.search, size: 18),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      ),
+      onChanged: (v) =>
+          ref.read(memberSearchQueryProvider.notifier).state = v,
+    );
+    final deleteButton = OutlinedButton.icon(
+      onPressed: _deletingAll ? null : _deleteAllMembers,
+      icon: _deletingAll
+          ? const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.delete_sweep_outlined, size: 16),
+      label: Text(AppStrings.deleteAll),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.error,
+        side: const BorderSide(color: AppColors.error),
+      ),
+    );
+    final addButton = ElevatedButton.icon(
+      onPressed: () => context.go('/members/add'),
+      icon: const Icon(Icons.person_add_outlined, size: 16),
+      label: Text(AppStrings.newMember),
+    );
+
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: Responsive.pagePadding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: AppStrings.search,
-                    prefixIcon: const Icon(Icons.search, size: 18),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
-                  ),
-                  onChanged: (v) => ref
-                      .read(memberSearchQueryProvider.notifier)
-                      .state = v,
-                ),
-              ),
-              const SizedBox(width: 12),
-              OutlinedButton.icon(
-                onPressed: _deletingAll ? null : _deleteAllMembers,
-                icon: _deletingAll
-                    ? const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.delete_sweep_outlined, size: 16),
-                label: Text(AppStrings.deleteAll),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.error,
-                  side: const BorderSide(color: AppColors.error),
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton.icon(
-                onPressed: () => context.go('/members/add'),
-                icon: const Icon(Icons.person_add_outlined, size: 16),
-                label: Text(AppStrings.newMember),
-              ),
-            ],
-          ),
+          if (mobile) ...[
+            searchField,
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(child: deleteButton),
+                const SizedBox(width: 8),
+                Expanded(child: addButton),
+              ],
+            ),
+          ] else
+            Row(
+              children: [
+                Expanded(child: searchField),
+                const SizedBox(width: 12),
+                deleteButton,
+                const SizedBox(width: 8),
+                addButton,
+              ],
+            ),
           const SizedBox(height: 20),
 
           // Members list

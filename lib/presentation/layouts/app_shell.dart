@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/utils/responsive.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/language_provider.dart';
 
@@ -12,7 +13,7 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isMobile = MediaQuery.of(context).size.width < 768;
+    final isMobile = Responsive.isMobile(context);
 
     if (isMobile) {
       return _MobileShell(child: child);
@@ -68,13 +69,16 @@ class _MobileShellState extends ConsumerState<_MobileShell> {
         backgroundColor: AppColors.sidebarBg,
         child: _SidebarContent(),
       ),
-      body: Column(
-        children: [
-          _TopBar(
-            onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
-          ),
-          Expanded(child: widget.child),
-        ],
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            _TopBar(
+              onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
+            ),
+            Expanded(child: widget.child),
+          ],
+        ),
       ),
     );
   }
@@ -283,12 +287,15 @@ class _TopBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isMobile = MediaQuery.of(context).size.width < 768;
+    final isMobile = Responsive.isMobile(context);
+    final compact = Responsive.width(context) < 400;
     final lang = ref.watch(languageProvider);
 
     return Container(
       height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 8 : (isMobile ? 12 : 20),
+      ),
       decoration: const BoxDecoration(
         color: AppColors.surface,
         border: Border(bottom: BorderSide(color: AppColors.border)),
@@ -303,8 +310,11 @@ class _TopBar extends ConsumerWidget {
             const SizedBox(width: 8),
           ],
           // Page title via route
-          _RouteTitle(),
-          const Spacer(),
+          Expanded(
+            child: _RouteTitle(),
+          ),
+          if (!isMobile) const Spacer(),
+          if (isMobile) const SizedBox(width: 4),
           // Search
           if (!isMobile)
             Container(
@@ -354,37 +364,36 @@ class _TopBar extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
 
-          // Notification bell
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined,
-                    color: AppColors.textSecondary),
-                onPressed: () {},
-              ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppColors.error,
-                    shape: BoxShape.circle,
+          if (!compact) ...[
+            Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.notifications_outlined,
+                      color: AppColors.textSecondary),
+                  onPressed: () {},
+                ),
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: AppColors.error,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-
-          // Settings
-          IconButton(
-            icon: const Icon(Icons.settings_outlined,
-                color: AppColors.textSecondary),
-            onPressed: () {},
-          ),
+              ],
+            ),
+            IconButton(
+              icon: const Icon(Icons.settings_outlined,
+                  color: AppColors.textSecondary),
+              onPressed: () {},
+            ),
+          ],
 
           // Avatar
           CircleAvatar(
@@ -454,6 +463,8 @@ class _RouteTitle extends ConsumerWidget {
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
