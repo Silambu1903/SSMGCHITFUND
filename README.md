@@ -23,6 +23,18 @@ Supabase project: `SSMG_CHIT_FUND_BACKEND`
 
 Configure API keys in `lib/core/constants/supabase_config.dart`.
 
+## WhatsApp payment notices
+
+After each new auction, members can receive payment reminders (chit no., amount, date) via **WhatsApp Business API**.
+
+Setup: see [docs/WHATSAPP_SETUP.md](docs/WHATSAPP_SETUP.md)
+
+```bash
+supabase functions deploy send-auction-whatsapp
+supabase secrets set WHATSAPP_ACCESS_TOKEN=...
+supabase secrets set WHATSAPP_PHONE_NUMBER_ID=...
+```
+
 ## Deploy to Cloudflare Pages
 
 Site name: **ssmgchitfund** → `https://ssmgchitfund.pages.dev`

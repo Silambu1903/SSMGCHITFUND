@@ -12,6 +12,7 @@ import '../../../data/models/chit_model.dart';
 import '../../../data/models/member_model.dart';
 import '../../../data/repositories/member_repository.dart';
 import '../../../core/services/auction_pdf_export_helper.dart';
+import '../../../core/services/whatsapp_service.dart';
 import '../../../providers/auction_provider.dart';
 import '../../../providers/chit_provider.dart';
 import '../../../providers/dashboard_provider.dart';
@@ -219,6 +220,105 @@ class _RecordAuctionScreenState extends ConsumerState<RecordAuctionScreen> {
   double get _discountPct =>
       _chitAmount > 0 ? (_discount / _chitAmount) * 100 : 0;
 
+  Future<void> _sendWhatsAppNotices(AuctionModel auction) async {
+    final chit = _selectedChit;
+    if (chit == null || !mounted) return;
+
+    final rows =
+        await ref.read(chitRepositoryProvider).getChitMembers(chit.id);
+    final recipients = whatsAppRecipientsFromChitMembers(rows);
+
+    if (recipients.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppStrings.whatsappNoMembers)),
+        );
+      }
+      return;
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.whatsappSending),
+          duration: const Duration(seconds: 30),
+        ),
+      );
+    }
+
+    try {
+      final result = await WhatsAppService.sendAuctionPaymentNotices(
+        chitCode: chit.chitCode,
+        auctionDate: auction.auctionDate,
+        paymentMonth: auction.auctionMonth,
+        dueAmount: auction.nextMonthPayable ?? _nextPayable,
+        members: recipients,
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppStrings.whatsappSendResult(result.sent, result.failed),
+          ),
+          backgroundColor:
+              result.hasFailures ? AppColors.warning : AppColors.success,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    } on WhatsAppServiceException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.whatsappSendFailed(e.message)),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.whatsappSendFailed('$e')),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  Future<bool?> _promptWhatsAppSend() {
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.chat_rounded, color: Colors.green.shade600),
+            const SizedBox(width: 8),
+            Expanded(child: Text(AppStrings.sendWhatsAppNotices)),
+          ],
+        ),
+        content: Text(
+          AppStrings.auctionSavedWhatsAppPrompt,
+          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(AppStrings.skip),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(ctx, true),
+            icon: const Icon(Icons.send_rounded, size: 16),
+            label: Text(AppStrings.sendNow),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── Save ────────────────────────────────────────────────────────────────────
   Future<void> _save() async {
     if (_selectedChit == null) {
@@ -342,6 +442,13 @@ class _RecordAuctionScreenState extends ConsumerState<RecordAuctionScreen> {
               ),
             );
           }
+        }
+      }
+
+      if (!_isEdit && savedAuction != null && mounted) {
+        final sendWhatsApp = await _promptWhatsAppSend();
+        if (sendWhatsApp == true && mounted) {
+          await _sendWhatsAppNotices(savedAuction);
         }
       }
 

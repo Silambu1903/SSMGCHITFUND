@@ -588,6 +588,24 @@ class AppStrings {
   static String get auctionSavedExportPrompt => isTamil
       ? 'ஏலம் வெற்றிகரமாக சேமிக்கப்பட்டது.\n\nதமிழ் ஏல ரசீதை PDF ஆக ஏற்றுமதி செய்யவா?'
       : 'Auction saved successfully.\n\nExport the Tamil auction receipt as PDF now?';
+  static String get sendWhatsAppNotices =>
+      isTamil ? 'WhatsApp அறிவிப்பு அனுப்பு' : 'Send WhatsApp Notices';
+  static String get auctionSavedWhatsAppPrompt => isTamil
+      ? 'அனைத்து உறுப்பினர்களுக்கும் WhatsApp-ல் சீட்டு எண், கட்டணத் தொகை மற்றும் ஏல தேதியை அனுப்பவா?'
+      : 'Send chit no., payment amount and auction date to all members via WhatsApp?';
+  static String get sendNow => isTamil ? 'அனுப்பு' : 'Send Now';
+  static String get skip => isTamil ? 'தவிர்' : 'Skip';
+  static String get whatsappSending =>
+      isTamil ? 'WhatsApp அறிவிப்புகள் அனுப்பப்படுகின்றன…' : 'Sending WhatsApp notices…';
+  static String get whatsappNoMembers => isTamil
+      ? 'கைபேசி எண் உள்ள உறுப்பினர்கள் இல்லை'
+      : 'No members with mobile numbers found';
+  static String whatsappSendResult(int sent, int failed) => isTamil
+      ? 'WhatsApp: $sent அனுப்பப்பட்டது${failed > 0 ? ', $failed தோல்வி' : ''}'
+      : 'WhatsApp: $sent sent${failed > 0 ? ', $failed failed' : ''}';
+  static String whatsappSendFailed(String error) => isTamil
+      ? 'WhatsApp அனுப்ப முடியவில்லை: $error'
+      : 'WhatsApp send failed: $error';
   static String get later => isTamil ? 'பின்னர்' : 'Later';
   static String get selectChitScheme =>
       isTamil ? 'சீட்டு திட்டம் தேர்ந்தெடுக்கவும்' : 'Select chit scheme';
