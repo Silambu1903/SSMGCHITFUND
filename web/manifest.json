@@ -1,11 +1,11 @@
 {
-    "name": "SSMG Chit Fund Application",
-    "short_name": "SSMG Chit Fund",
+    "name": "SSMGCHITFUND",
+    "short_name": "SSMGCHITFUND",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "SSMG Chit Fund Application - Digital Chit Fund Management System",
+    "background_color": "#002147",
+    "theme_color": "#002147",
+    "description": "Sri Selva Maha Ganapathi Chit Fund - SSMGCHITFUND",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

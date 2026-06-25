@@ -22,3 +22,19 @@ flutter run
 Supabase project: `SSMG_CHIT_FUND_BACKEND`
 
 Configure API keys in `lib/core/constants/supabase_config.dart`.
+
+## Deploy to Cloudflare Pages
+
+Site name: **ssmgchitfund** → `https://ssmgchitfund.pages.dev`
+
+```bash
+# One-time: authenticate with Cloudflare
+npx wrangler login
+
+# Build and deploy
+./scripts/deploy-cloudflare.sh
+```
+
+Or set `CLOUDFLARE_API_TOKEN` and run the script (CI-friendly).
+
+Login screen uses the Vinayagar (Ganesha) hero image on the left panel.
