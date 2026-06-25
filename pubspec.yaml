@@ -1,0 +1,54 @@
+name: ssmg_chit_fund_application
+description: SSMG Chit Fund Application - Digital Chit Fund Management System
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+
+  # Navigation
+  go_router: ^14.6.2
+
+  # Backend
+  supabase_flutter: ^2.8.4
+
+  # UI
+  fl_chart: ^0.69.0
+  shimmer: ^3.0.0
+  cached_network_image: ^3.4.1
+  intl: ^0.20.2
+  google_fonts: ^6.2.1
+
+  # Utils
+  uuid: ^4.5.1
+  http: ^1.2.2
+  pdf: ^3.12.0
+  printing: ^5.14.3
+  image: ^4.8.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/fonts/BAMINI-Tamil12.ttf
+    - assets/images/auction_form_reference.png
+    - assets/images/
+    - assets/icons/
+  fonts:
+    - family: BaminiTamil12
+      fonts:
+        - asset: assets/fonts/BAMINI-Tamil12.ttf
